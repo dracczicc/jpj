@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stylish QR Code Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-slate-300 min-h-screen flex items-center justify-center p-6">
+
+  <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center mb-4">Stylish QR Code Generator</h1>
+    
+    <input id="urlInput" type="text" placeholder="Masukkan pautan URL anda..." 
+      class="w-full p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" />
+    
+    <button onclick="generateQRCode()" 
+      class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition">
+      Jana QR Code
+    </button>
+
+    <div id="qrWrapper" class="mt-6 flex flex-col items-center hidden">
+      <div id="qr-code" class="mb-4"></div>
+      <button onclick="downloadQRCode()" 
+        class="bg-white border border-gray-400 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 flex items-center">
+        💾 Muat Turun
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const qrCode = new QRCodeStyling({
+      width: 300,
+      height: 300,
+      type: "svg",
+      data: "",
+      image: "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg",
+      dotsOptions: {
+        color: "#1f2937",
+        type: "rounded"
+      },
+      backgroundOptions: {
+        color: "#f9fafb"
+      },
+      imageOptions: {
+        crossOrigin: "anonymous",
+        margin: 10
+      }
+    });
+
+    function generateQRCode() {
+      const url = document.getElementById("urlInput").value;
+      if (!url) {
+        alert("Sila masukkan URL terlebih dahulu.");
+        return;
+      }
+
+      qrCode.update({ data: url });
+
+      const qrContainer = document.getElementById("qr-code");
+      qrContainer.innerHTML = ""; // clear before appending
+      qrCode.append(qrContainer);
+
+      document.getElementById("qrWrapper").classList.remove("hidden");
+    }
+
+    function downloadQRCode() {
+      qrCode.download({ name: "qr-code", extension: "png" });
+    }
+  </script>
+
+</body>
+</html>
