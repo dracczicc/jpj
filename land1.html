@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Car Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0e0e0e, #1a1a1a);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1300px;
+    }
+
+    .card {
+      background: linear-gradient(145deg, #1b1b1b, #292929);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(255, 165, 0, 0.2);
+    }
+
+    .card.clock {
+      align-items: center;
+      font-size: 2rem;
+    }
+
+    .face-rec {
+      background: url('https://i.imgur.com/4ZQhYXZ.jpg') no-repeat center center/cover;
+      color: white;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 1.2rem;
+      position: relative;
+    }
+
+    .face-rec::after {
+      content: 'Face Recognized\AAll doors locked';
+      white-space: pre;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 20px;
+    }
+
+    .graph {
+      height: 100px;
+      background: linear-gradient(to top right, #ff8c00, #ffaa33);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      animation: pulseGraph 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseGraph {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .music-player {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .music-player .cover {
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle at center, #ff5e62 0%, #ff9966 100%);
+      border-radius: 50%;
+      margin-bottom: 10px;
+      animation: spin 10s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .music-player button {
+      margin: 5px;
+      padding: 10px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.3s;
+    }
+
+    .music-player button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .clock-time {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard">
+    <div class="card">
+      <h2><i class="fas fa-car"></i> 23.6 minutes</h2>
+      <p>Average time in the car.</p>
+      <div class="graph"></div>
+    </div>
+
+    <div class="card face-rec"></div>
+
+    <div class="card clock">
+      <div class="clock-time" id="clock"></div>
+    </div>
+
+    <div class="card">
+      <h2><i class="fas fa-location-arrow"></i> 240 m</h2>
+      <p>Turn to right.<br />Manta St, 176W<br /><small>23 minutes without traffic.</small></p>
+    </div>
+
+    <div class="card">
+      <h3><i class="fas fa-map-marker-alt"></i> Hutchinson, Kansas, US</h3>
+      <p>Scheduled Trip</p>
+    </div>
+
+    <div class="card">
+      <h3>🚗 62.7 km/h</h3>
+      <p>Average speed</p>
+      <h4>⚡ 13.9 HP</h4>
+      <p>Engine power</p>
+      <h4>🔧 20.4 N.m</h4>
+      <p>Torque ratio</p>
+    </div>
+
+    <div class="card music-player">
+      <div class="cover"></div>
+      <p>🎵 Blinding Lights</p>
+      <div>
+        <button><i class="fas fa-backward"></i></button>
+        <button><i class="fas fa-play"></i></button>
+        <button><i class="fas fa-forward"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+
+  </html>
+  
