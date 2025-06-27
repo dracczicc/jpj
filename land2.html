@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>Smart Car Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-glow {
+            position: absolute;
+            bottom: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(100px);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 300px 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            padding: 40px;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: rgba(45, 55, 72, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .time-card {
+            grid-row: 1 / 2;
+            grid-column: 1 / 2;
+            color: white;
+        }
+
+        .time-value {
+            font-size: 48px;
+            font-weight: 300;
+            margin-bottom: 8px;
+        }
+
+        .time-label {
+            font-size: 14px;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart {
+            width: 100%;
+            height: 60px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .chart-line {
+            stroke: #ffa500;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .face-card {
+            grid-row: 1 / 3;
+            grid-column: 2 / 3;
+            background: linear-gradient(145deg, #d2691e, #ff8c00);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .face-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 20%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 40% 40%, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 20px 20px, 25px 25px, 15px 15px;
+        }
+
+        .face-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(0,0,0,0.3), rgba(255,255,255,0.1));
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .face-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .face-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            position: relative;
+            z-index: 2;
+        }
+
+        .lock-icon {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            z-index: 2;
+        }
+
+        .clock-card {
+            grid-row: 1 / 2;
+            grid-column: 3 / 4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .clock {
+            width: 120px;
+            height: 120px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .clock-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hour-hand, .minute-hand {
+            position: absolute;
+            background: #ffa500;
+            transform-origin: bottom center;
+            left: 50%;
+            bottom: 50%;
+        }
+
+        .hour-hand {
+            width: 3px;
+            height: 30px;
+            margin-left: -1.5px;
+            transform: translateX(-50%) rotate(45deg);
+        }
+
+        .minute-hand {
+            width: 2px;
+            height: 45px;
+            margin-left: -1px;
+            transform: translateX(-50%) rotate(180deg);
+        }
+
+        .center-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: #ffa500;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .clock-time {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .nav-card {
+            grid-row: 1 / 2;
+            grid-column: 4 / 5;
+            color: white;
+        }
+
+        .nav-value {
+            font-size: 36px;
+            font-weight: 300;
+            margin-bottom: 8px;
+        }
+
+        .nav-label {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .nav-direction {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .arrow-icon {
+            font-size: 24px;
+            transform: rotate(-45deg);
+        }
+
+        .map-card {
+            grid-row: 2 / 3;
+            grid-column: 1 / 2;
+            color: white;
+            position: relative;
+        }
+
+        .map-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 30% 30%, rgba(255,165,0,0.1) 2px, transparent 2px),
+                radial-gradient(circle at 70% 70%, rgba(255,165,0,0.05) 1px, transparent 1px);
+            background-size: 30px 30px, 20px 20px;
+        }
+
+        .map-location {
+            font-size: 14px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .map-status {
+            font-size: 12px;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .play-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #ffa500;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 2;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+        }
+
+        .stats-card {
+            grid-row: 2 / 3;
+            grid-column: 3 / 4;
+            color: white;
+            position: relative;
+        }
+
+        .car-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            opacity: 0.1;
+        }
+
+        .stats-list {
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffa500;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .music-card {
+            grid-row: 2 / 3;
+            grid-column: 4 / 5;
+            background: linear-gradient(145deg, #8b0000, #ff4500);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .vinyl-record {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #330000 30%, #8b0000 70%);
+            position: relative;
+            margin-bottom: 20px;
+            animation: spin 3s linear infinite;
+        }
+
+        .vinyl-record::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            background: #330000;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .music-controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .control-btn.play {
+            background: rgba(255, 255, 255, 0.9);
+            color: #8b0000;
+        }
+
+        /* Responsive Design */
+        
+        /* Large Desktop */
+        @media (max-width: 1400px) {
+            .dashboard {
+                padding: 30px;
+                gap: 16px;
+            }
+        }
+
+        /* Desktop */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr 280px 1fr 1fr;
+                padding: 25px;
+                gap: 15px;
+            }
+            
+            .time-value { font-size: 42px; }
+            .nav-value { font-size: 32px; }
+        }
+
+        /* Large Tablet */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto auto auto;
+                padding: 20px;
+                gap: 15px;
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .time-card { grid-column: 1; grid-row: 1; }
+            .face-card { grid-column: 2; grid-row: 1/3; min-height: 300px; }
+            .clock-card { grid-column: 1; grid-row: 2; }
+            .nav-card { grid-column: 1; grid-row: 3; }
+            .map-card { grid-column: 2; grid-row: 3; }
+            .stats-card { grid-column: 1; grid-row: 4; }
+            .music-card { grid-column: 2; grid-row: 4; }
+            
+            .card { padding: 20px; }
+            .time-value { font-size: 36px; }
+            .nav-value { font-size: 28px; }
+        }
+
+        /* Tablet Portrait */
+        @media (max-width: 768px) {
+            body { overflow-y: auto; }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(6, auto);
+                padding: 16px;
+                gap: 12px;
+                height: auto;
+            }
+            
+            .time-card { grid-column: 1; grid-row: 1; }
+            .face-card { grid-column: 1; grid-row: 2; min-height: 250px; }
+            .clock-card { grid-column: 1; grid-row: 3; }
+            .nav-card { grid-column: 1; grid-row: 4; }
+            .map-card { grid-column: 1; grid-row: 5; }
+            .stats-card { grid-column: 1; grid-row: 6; }
+            .music-card { grid-column: 1; grid-row: 7; }
+            
+            .card { 
+                padding: 18px; 
+                border-radius: 20px;
+                min-height: 120px;
+            }
+            
+            .time-value { font-size: 32px; }
+            .nav-value { font-size: 24px; }
+            .face-avatar { width: 100px; height: 100px; font-size: 40px; }
+            .face-title { font-size: 20px; }
+            .clock { width: 100px; height: 100px; }
+            .vinyl-record { width: 70px; height: 70px; }
+            
+            .background-glow {
+                width: 600px;
+                height: 600px;
+                bottom: -30%;
+                right: -30%;
+            }
+        }
+
+        /* Large Mobile */
+        @media (max-width: 480px) {
+            .dashboard {
+                padding: 12px;
+                gap: 10px;
+            }
+            
+            .card { 
+                padding: 16px; 
+                border-radius: 18px;
+                min-height: 100px;
+            }
+            
+            .time-value { font-size: 28px; }
+            .time-label { font-size: 12px; }
+            .nav-value { font-size: 20px; }
+            .nav-label { font-size: 12px; }
+            .face-avatar { width: 80px; height: 80px; font-size: 32px; }
+            .face-title { font-size: 18px; }
+            .face-subtitle { font-size: 12px; }
+            .clock { width: 80px; height: 80px; }
+            .clock-time { font-size: 16px; }
+            .vinyl-record { width: 60px; height: 60px; }
+            .stat-value { font-size: 20px; }
+            .stat-label { font-size: 11px; }
+            
+            .chart { height: 50px; }
+            .control-btn { width: 35px; height: 35px; }
+            .play-button { width: 45px; height: 45px; font-size: 18px; }
+            
+            .nav-direction { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .arrow-icon { align-self: flex-end; }
+            
+            .background-glow {
+                width: 400px;
+                height: 400px;
+                bottom: -20%;
+                right: -40%;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 360px) {
+            .dashboard { padding: 10px; gap: 8px; }
+            
+            .card { 
+                padding: 14px; 
+                border-radius: 16px;
+                min-height: 90px;
+            }
+            
+            .time-value { font-size: 24px; }
+            .nav-value { font-size: 18px; }
+            .face-avatar { width: 70px; height: 70px; font-size: 28px; }
+            .face-title { font-size: 16px; }
+            .clock { width: 70px; height: 70px; }
+            .vinyl-record { width: 50px; height: 50px; }
+            .stat-value { font-size: 18px; }
+            
+            .music-controls { gap: 10px; }
+            .control-btn { width: 30px; height: 30px; font-size: 12px; }
+            .play-button { width: 40px; height: 40px; font-size: 16px; }
+        }
+
+        /* Ultra Wide Screens */
+        @media (min-width: 1600px) {
+            .dashboard {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 50px;
+                gap: 25px;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .card:hover {
+                transform: none;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            }
+            
+            .control-btn, .play-button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .card {
+                transition: transform 0.2s ease;
+            }
+            
+            .card:active {
+                transform: scale(0.98);
+            }
+        }
+
+        /* High DPI Displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .card {
+                border-width: 0.5px;
+            }
+            
+            .hour-hand, .minute-hand {
+                border-radius: 1px;
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-width: 896px) and (orientation: landscape) and (max-height: 500px) {
+            .dashboard {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+                height: 100vh;
+                overflow: hidden;
+            }
+            
+            .time-card { grid-column: 1; grid-row: 1; }
+            .face-card { grid-column: 2; grid-row: 1/3; }
+            .clock-card { grid-column: 3; grid-row: 1; }
+            .nav-card { grid-column: 1; grid-row: 2; }
+            .map-card { grid-column: 3; grid-row: 2; }
+            .stats-card { display: none; }
+            .music-card { display: none; }
+            
+            body { overflow: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <div class="dashboard">
+        <!-- Time Card -->
+        <div class="card time-card">
+            <div class="time-value">23.6<span style="font-size: 24px; opacity: 0.7;">minutes</span></div>
+            <div class="time-label">
+                <span>⏱</span> Average time in the car.
+            </div>
+            <div class="chart">
+                <svg width="100%" height="60">
+                    <polyline class="chart-line" points="0,40 30,35 60,45 90,30 120,25 150,35 180,20 210,15 240,25 270,30"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Face Recognition Card -->
+        <div class="card face-card">
+            <div class="face-pattern"></div>
+            <div class="face-avatar">👤</div>
+            <div class="face-title">Face Recognized</div>
+            <div class="face-subtitle">All doors locked.</div>
+            <div class="lock-icon">🔒</div>
+        </div>
+
+        <!-- Clock Card -->
+        <div class="card clock-card">
+            <div class="clock">
+                <div class="clock-face">
+                    <div class="hour-hand"></div>
+                    <div class="minute-hand"></div>
+                    <div class="center-dot"></div>
+                </div>
+            </div>
+            <div class="clock-time">07:23</div>
+        </div>
+
+        <!-- Navigation Card -->
+        <div class="card nav-card">
+            <div class="nav-value">240<span style="font-size: 18px; opacity: 0.7;">m</span></div>
+            <div class="nav-label">Turn to right.</div>
+            <div class="nav-direction">
+                <span class="arrow-icon">↗</span>
+                <div>
+                    <div style="color: #ffa500; font-size: 12px;">Manta St, T76W.</div>
+                    <div style="font-size: 11px; opacity: 0.6;">23 minutes without traffic.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Card -->
+        <div class="card map-card">
+            <div class="map-pattern"></div>
+            <div class="map-location">Hutchinson, Kansas, US.</div>
+            <div class="map-status">
+                <span>📋</span> Scheduled Trip
+            </div>
+            <div class="play-button">▶</div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="card stats-card">
+            <div class="car-icon">🚗</div>
+            <div class="stats-list">
+                <div class="stat-item">
+                    <div>
+                        <div class="stat-value">62.7</div>
+                        <div class="stat-label">Average speed</div>
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">km/h</div>
+                </div>
+                <div class="stat-item">
+                    <div>
+                        <div class="stat-value">13.9</div>
+                        <div class="stat-label">Engine bhp power</div>
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">HP</div>
+                </div>
+                <div class="stat-item">
+                    <div>
+                        <div class="stat-value">20.4</div>
+                        <div class="stat-label">Torque ratio</div>
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">N.m</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Music Card -->
+        <div class="card music-card">
+            <div class="vinyl-record"></div>
+            <div class="music-controls">
+                <div class="control-btn">⏮</div>
+                <div class="control-btn">📊</div>
+                <div class="control-btn">⏭</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update clock every second
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            const hourAngle = (hours % 12) * 30 + minutes * 0.5; // 30 degrees per hour + minute adjustment
+            const minuteAngle = minutes * 6; // 6 degrees per minute
+            
+            document.querySelector('.hour-hand').style.transform = `translateX(-50%) rotate(${hourAngle}deg)`;
+            document.querySelector('.minute-hand').style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+            
+            // Update digital time
+            document.querySelector('.clock-time').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+        
+        // Initialize clock and update every second
+        updateClock();
+        let clockInterval = setInterval(updateClock, 1000);
+
+        // Add hover effects and interactions (desktop only)
+        if (window.innerWidth > 768) {
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        }
+        let touchStartY = 0;
+        let touchEndY = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.changedTouches[0].screenY;
+        });
+        
+        document.addEventListener('touchend', function(e) {
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartY - touchEndY;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                // Add subtle feedback for swipe
+                document.body.style.transform = `translateY(${diff > 0 ? -2 : 2}px)`;
+                setTimeout(() => {
+                    document.body.style.transform = 'translateY(0)';
+                }, 200);
+            }
+        }
+
+        // Optimize for mobile performance
+        if (window.innerWidth <= 768) {
+            // Reduce animation frequency on mobile
+            const mobileUpdateInterval = 2000; // Update every 2 seconds instead of 1
+            clearInterval(clockInterval);
+            clockInterval = setInterval(updateClock, mobileUpdateInterval);
+            
+            // Disable vinyl animation on very small screens
+            if (window.innerWidth <= 360) {
+                document.querySelector('.vinyl-record').style.animation = 'none';
+            }
+        }
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                // Recalculate layout after orientation change
+                updateClock();
+            }, 100);
+        });
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Music controls
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+
+        // Play button interaction
+        document.querySelector('.play-button').addEventListener('click', function() {
+            this.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 200);
+        });
+    </script>
+</body>
+</html>
